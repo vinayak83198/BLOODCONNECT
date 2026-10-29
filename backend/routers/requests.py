@@ -285,24 +285,71 @@ def accept_request(
         },
     )
 
-    # Notify the requester if they have connected Telegram. Notification
-    # failure must never undo a successful donor acceptance.
+    # Notify both donor and recipient after the request is successfully matched.
+    # Notification failures must never undo the successful match.
     try:
         requester = find_one("users", user_id=request["recipient_id"])
-        chat_id = requester.get("telegram_chat_id") if requester else None
-        if chat_id:
-            send_telegram_message(
-                chat_id,
-                "🩸 BloodConnect — Your request has been accepted!\n\n"
-                f"Request: {request_id}\n"
-                f"Blood group: {request['blood_group']}\n"
-                f"Donor: {current_user.get('name', 'A donor')}\n"
-                f"Hospital: {request['hospital_name']}\n\n"
-                "Open BloodConnect → My Requests to view the matched request and next steps.",
+
+        donor_chat_id = current_user.get("telegram_chat_id")
+        recipient_chat_id = requester.get("telegram_chat_id") if requester else None
+
+        latitude = request.get("recipient_latitude")
+        longitude = request.get("recipient_longitude")
+        if latitude is not None and longitude is not None:
+            map_link = f"https://www.google.com/maps?q={latitude},{longitude}"
+        else:
+            map_link = "Location coordinates are not available."
+
+        donor_message = (
+            "🩸 BloodConnect — Your request was accepted!\n\n"
+            f"Recipient: {request.get('recipient_name', 'Recipient')}\n"
+            f"Recipient phone: {requester.get('phone', 'Not available') if requester else 'Not available'}\n"
+            f"Blood group needed: {request['blood_group']}\n"
+            f"Units needed: {request['units_needed']}\n"
+            f"Hospital: {request['hospital_name']}\n"
+            f"Location: {map_link}\n"
+            f"Urgency: {request['urgency']}\n\n"
+            "Please contact the recipient to coordinate the donation."
+        )
+
+        recipient_message = (
+            "🩸 BloodConnect — A donor has accepted your request!\n\n"
+            f"Donor: {current_user.get('name', 'Donor')}\n"
+            f"Donor phone: {current_user.get('phone', 'Not available')}\n"
+            f"Donor blood group: {current_user.get('blood_group', 'Not available')}\n"
+            f"Blood group needed: {request['blood_group']}\n"
+            f"Units needed: {request['units_needed']}\n"
+            f"Hospital: {request['hospital_name']}\n"
+            f"Urgency: {request['urgency']}\n\n"
+            "Please contact the donor to coordinate the donation."
+        )
+
+        if donor_chat_id:
+            if not send_telegram_message(donor_chat_id, donor_message):
+                logger.warning(
+                    "Telegram notification failed for donor %s",
+                    current_user.get("user_id"),
+                )
+        else:
+            logger.warning(
+                "Donor %s has no linked Telegram chat",
+                current_user.get("user_id"),
+            )
+
+        if recipient_chat_id:
+            if not send_telegram_message(recipient_chat_id, recipient_message):
+                logger.warning(
+                    "Telegram notification failed for recipient of request %s",
+                    request_id,
+                )
+        else:
+            logger.warning(
+                "Recipient of request %s has no linked Telegram chat",
+                request_id,
             )
     except Exception:
         logger.exception(
-            "Telegram notification failed for requester of request %s",
+            "Telegram notification failed after matching request %s",
             request_id,
         )
 
