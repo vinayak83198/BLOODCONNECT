@@ -26,12 +26,19 @@ router = APIRouter(prefix="/api/requests", tags=["requests"])
 def _to_request_out(req: dict) -> BloodRequestOut:
     accepted_by_name = None
     accepted_by_phone = None
+    recipient_phone = None
 
-    if req.get("accepted_by"):
+    # Reveal contact details only after the request is matched.
+    if req.get("status") == "matched" and req.get("accepted_by"):
         donor = find_one("users", user_id=req["accepted_by"])
+        recipient = find_one("users", user_id=req["recipient_id"])
+
         if donor:
             accepted_by_name = donor.get("name")
             accepted_by_phone = donor.get("phone")
+
+        if recipient:
+            recipient_phone = recipient.get("phone")
 
     return BloodRequestOut(
         request_id=req["request_id"],
@@ -48,7 +55,9 @@ def _to_request_out(req: dict) -> BloodRequestOut:
         accepted_by=req.get("accepted_by"),
         accepted_by_name=accepted_by_name,
         accepted_by_phone=accepted_by_phone,
+        recipient_phone=recipient_phone,
     )
+
 
 
 def _notify_matching_donors(request: dict) -> None:

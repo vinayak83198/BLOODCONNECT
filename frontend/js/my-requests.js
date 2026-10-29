@@ -156,20 +156,38 @@
     }
 
     async function handleAccept(requestId, btn) {
-      btn.disabled = true;
-      const original = btn.textContent;
-      btn.textContent = "Accepting…";
-      try {
-        await api.acceptRequest(requestId);
-        await loadIncoming();
-        await loadOutgoing();
-      } catch (err) {
-        showBanner(err instanceof ApiError ? err.message : "Couldn't accept this request.");
-        btn.disabled = false;
-        btn.textContent = original;
-      }
-    }
+  btn.disabled = true;
+  const original = btn.textContent;
+  btn.textContent = "Accepting…";
 
+  try {
+    const matched = await api.acceptRequest(requestId);
+
+    await loadIncoming();
+    await loadOutgoing();
+
+    if (matched && matched.status === "matched") {
+      const contactCard = document.createElement("div");
+      contactCard.className = "card request-card";
+      contactCard.innerHTML = `
+        <h3>Request accepted successfully</h3>
+        <p><strong>Recipient:</strong> ${escapeHtml(matched.recipient_name)}</p>
+        <p><strong>Phone:</strong> ${escapeHtml(matched.recipient_phone || "Not available")}</p>
+        <p><strong>Hospital:</strong> ${escapeHtml(matched.hospital_name)}</p>
+        <p><strong>Blood group:</strong> ${escapeHtml(matched.blood_group)}</p>
+      `;
+      incomingPanel.prepend(contactCard);
+    }
+  } catch (err) {
+    showBanner(
+      err instanceof ApiError
+        ? err.message
+        : "Couldn't accept this request."
+    );
+    btn.disabled = false;
+    btn.textContent = original;
+  }
+}
     async function handleFulfill(requestId, btn) {
       btn.disabled = true;
       const original = btn.textContent;

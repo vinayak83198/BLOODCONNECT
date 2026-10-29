@@ -111,6 +111,7 @@ class BloodRequestOut(BaseModel):
     accepted_by: Optional[str] = None
     accepted_by_name: Optional[str] = None
     accepted_by_phone: Optional[str] = None
+    recipient_phone: Optional[str] = None
 
 
 class IncomingRequestOut(BaseModel):
