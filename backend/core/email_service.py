@@ -1,11 +1,13 @@
 
-"""Email delivery for verification and password-reset links using Gmail SMTP."""
+"""Email delivery for verification and password-reset links using Brevo API."""
 
 import os
-import smtplib
-from email.message import EmailMessage
 
+import httpx
 from fastapi import HTTPException, status
+
+
+BREVO_API_URL = "https://api.brevo.com/v3/smtp/email"
 
 
 def send_email(
@@ -14,40 +16,66 @@ def send_email(
     text_body: str,
     html_body: str | None = None,
 ) -> None:
-    host = os.getenv("SMTP_HOST", "smtp.gmail.com")
-    username = os.getenv("SMTP_USERNAME")
-    password = os.getenv("SMTP_PASSWORD")
-    from_email = os.getenv("SMTP_FROM_EMAIL") or username
+    """Send a transactional email using the Brevo HTTP API."""
 
-    if not username or not password or not from_email:
+    api_key = os.getenv("BREVO_API_KEY")
+    from_email = os.getenv("BREVO_SENDER_EMAIL")
+    from_name = os.getenv("BREVO_SENDER_NAME", "BloodConnect")
+
+    if not api_key or not from_email:
+        print(
+            "BREVO ERROR: BREVO_API_KEY or BREVO_SENDER_EMAIL is missing.",
+            flush=True,
+        )
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Email delivery is not configured.",
         )
 
-    msg = EmailMessage()
-    msg["Subject"] = subject
-    msg["From"] = from_email
-    msg["To"] = to_email
-    msg.set_content(text_body)
+    payload = {
+        "sender": {
+            "name": from_name,
+            "email": from_email,
+        },
+        "to": [
+            {"email": to_email}
+        ],
+        "subject": subject,
+        "textContent": text_body,
+    }
 
     if html_body:
-        msg.add_alternative(html_body, subtype="html")
+        payload["htmlContent"] = html_body
+
+    headers = {
+        "accept": "application/json",
+        "api-key": api_key,
+        "content-type": "application/json",
+    }
 
     try:
-        port = int(os.getenv("SMTP_PORT", "587"))
-        timeout = float(os.getenv("SMTP_TIMEOUT_SECONDS", "15"))
+        response = httpx.post(
+            BREVO_API_URL,
+            headers=headers,
+            json=payload,
+            timeout=20.0,
+        )
+        response.raise_for_status()
 
-        with smtplib.SMTP(host, port, timeout=timeout) as server:
-            server.ehlo()
-            server.starttls()
-            server.ehlo()
-            server.login(username, password)
-            server.send_message(msg)
-
-    except (OSError, smtplib.SMTPException, ValueError) as exc:
+    except httpx.HTTPStatusError as exc:
+        # Do not print the API key or the full response body.
         print(
-            f"SMTP ERROR: {type(exc).__name__}: {exc}",
+            f"BREVO ERROR: HTTP {exc.response.status_code}",
+            flush=True,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="We could not send the email right now. Please try again.",
+        ) from exc
+
+    except httpx.RequestError as exc:
+        print(
+            f"BREVO CONNECTION ERROR: {type(exc).__name__}",
             flush=True,
         )
         raise HTTPException(
