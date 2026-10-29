@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verify email — BloodConnect</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:wght@500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <main class="shell shell--narrow">
+    <section class="card card--pad security-card">
+      <a href="index.html">← Back to BloodConnect</a>
+      <h1>Email verification</h1>
+      <p id="description">We're checking your verification link…</p>
+      <div id="notice" class="banner is-visible" role="status">Please wait…</div>
+      <p><a href="index.html">Go to login</a></p>
+    </section>
+  </main>
+ <script>
+  window.BLOODCONNECT_API_BASE_URL =
+    `${window.location.protocol}//${window.location.hostname}:8000`;
+ </script>
+ <script src="js/api.js"></script>
+  <script>
+    (async function verify() {
+      const { api, ApiError } = window.BloodConnect;
+      const notice = document.getElementById("notice");
+      const description = document.getElementById("description");
+      const token = new URLSearchParams(window.location.search).get("token");
+      if (!token) {
+        notice.textContent = "This verification link is missing a token. Return to login and request another verification email.";
+        notice.className = "banner is-visible banner--error";
+        return;
+      }
+      try {
+        const result = await api.verifyEmail(token);
+        description.textContent = "Your email address is confirmed.";
+        notice.textContent = result.message;
+        notice.className = "banner is-visible banner--success";
+      } catch (error) {
+        notice.textContent = error instanceof ApiError ? error.message : "Could not verify this email. Request a new link.";
+        notice.className = "banner is-visible banner--error";
+      }
+    })();
+  </script>
+</body>
+</html>

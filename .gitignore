@@ -1,0 +1,35 @@
+# Secrets and environment variables
+.env
+.env.*
+!.env.example
+backend/.env
+backend/.env.*
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+
+# Local databases and user data
+*.db
+*.sqlite
+*.sqlite3
+backend/data/
+backend/storage/
+
+# Editor and OS files
+.DS_Store
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+!backend/.env.example
+
+# Backup files
+*.bak
+*.save

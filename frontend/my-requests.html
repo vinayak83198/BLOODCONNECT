@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BloodConnect — My Requests</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:wght@500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="page">
+  <header class="topbar">
+    <div class="topbar__brand">
+      <span class="topbar__brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C12 2 5 10.5 5 15a7 7 0 0014 0c0-4.5-7-13-7-13z" fill="#fff"/>
+        </svg>
+      </span>
+      BloodConnect
+    </div>
+    <nav class="topbar__nav" aria-label="Primary">
+      <a class="topbar__link" href="donor-search.html">Donor Search</a>
+      <a class="topbar__link" href="request-form.html">New Request</a>
+      <a class="topbar__link" href="my-requests.html" aria-current="page">My Requests</a>
+    </nav>
+    <div class="topbar__user">
+      <span class="topbar__user-name" data-nav-username></span>
+      <button class="btn btn--ghost btn--sm" data-nav-logout>Log out</button>
+      <button class="topbar__mobile-toggle" data-nav-toggle aria-expanded="false" aria-label="Toggle menu">☰</button>
+    </div>
+  </header>
+
+  <main class="shell">
+    <div class="page-header">
+      <p class="page-header__eyebrow">Request tracking</p>
+      <h1>My requests</h1>
+      <p>Track what you've asked for, and see requests nearby you're a compatible match for.</p>
+    </div>
+
+    <div id="banner" class="banner" role="alert"></div>
+
+    <div class="view-tabs" role="tablist">
+      <button type="button" id="tab-outgoing" class="is-active" role="tab" aria-selected="true">Requests I've sent</button>
+      <button type="button" id="tab-incoming" role="tab" aria-selected="false">Requests I can help with</button>
+    </div>
+
+    <div id="outgoing-panel"></div>
+    <div id="incoming-panel" style="display:none;"></div>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/my-requests.js"></script>
+</body>
+</html>

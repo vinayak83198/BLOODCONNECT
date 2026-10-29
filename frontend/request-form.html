@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BloodConnect — New Request</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:wght@500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="page">
+  <header class="topbar">
+    <div class="topbar__brand">
+      <span class="topbar__brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C12 2 5 10.5 5 15a7 7 0 0014 0c0-4.5-7-13-7-13z" fill="#fff"/>
+        </svg>
+      </span>
+      BloodConnect
+    </div>
+    <nav class="topbar__nav" aria-label="Primary">
+      <a class="topbar__link" href="donor-search.html">Donor Search</a>
+      <a class="topbar__link" href="request-form.html" aria-current="page">New Request</a>
+      <a class="topbar__link" href="my-requests.html">My Requests</a>
+    </nav>
+    <div class="topbar__user">
+      <span class="topbar__user-name" data-nav-username></span>
+      <button class="btn btn--ghost btn--sm" data-nav-logout>Log out</button>
+      <button class="topbar__mobile-toggle" data-nav-toggle aria-expanded="false" aria-label="Toggle menu">☰</button>
+    </div>
+  </header>
+
+  <main class="shell shell--narrow">
+    <div class="page-header">
+      <p class="page-header__eyebrow">Request module</p>
+      <h1>Create an emergency request</h1>
+      <p>Compatible donors within your chosen radius will see this. Your contact details stay private until someone accepts.</p>
+    </div>
+
+    <div id="banner" class="banner" role="alert"></div>
+
+    <form id="request-form" class="card card--pad" novalidate>
+      <div class="field-row">
+        <div class="field" id="blood-group-field">
+          <label for="blood-group">Blood group needed</label>
+          <select id="blood-group" required>
+            <option value="">Select</option>
+            <option>O+</option><option>O-</option>
+            <option>A+</option><option>A-</option>
+            <option>B+</option><option>B-</option>
+            <option>AB+</option><option>AB-</option>
+          </select>
+          <div class="field-error">Select the blood group needed.</div>
+        </div>
+        <div class="field" id="units-field">
+          <label for="units">Units needed</label>
+          <input type="number" id="units" min="1" max="20" value="1" required />
+          <div class="field-error">Enter between 1 and 20 units.</div>
+        </div>
+      </div>
+
+      <div class="field" id="hospital-field">
+        <label for="hospital">Hospital / location name</label>
+        <input type="text" id="hospital" minlength="2" required placeholder="e.g. City Care Hospital, Vijay Nagar" />
+        <div class="field-error">Enter the hospital or location name.</div>
+      </div>
+
+      <div class="field-row">
+        <div class="field" id="urgency-field">
+          <label for="urgency">Urgency</label>
+          <select id="urgency" required>
+            <option value="standard">Standard — within a few days</option>
+            <option value="urgent" selected>Urgent — within 24 hours</option>
+            <option value="critical">Critical — immediately</option>
+          </select>
+        </div>
+        <div class="field" id="radius-field">
+          <label for="radius">Search radius</label>
+          <select id="radius">
+            <option value="5">5 km</option>
+            <option value="10" selected>10 km</option>
+            <option value="20">20 km</option>
+            <option value="50">50 km</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="notes">Notes <span style="font-weight: 400; color: var(--text-muted);">(optional)</span></label>
+        <textarea id="notes" maxlength="500" placeholder="Anything a donor should know — ward, contact window, special instructions."></textarea>
+      </div>
+
+      <button type="submit" class="btn btn--primary btn--block" id="request-submit">
+        <span class="btn-label">Send request</span>
+      </button>
+    </form>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/request-form.js"></script>
+</body>
+</html>

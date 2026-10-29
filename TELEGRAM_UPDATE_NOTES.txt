@@ -1,0 +1,26 @@
+BloodConnect - Complete source package with Telegram notification updates
+
+IMPORTANT: This source package intentionally excludes backend/.env, backend/.venv,
+and backend/data/*.json. These files can contain credentials, installed machine-specific
+packages, user accounts, OTP records, and authentication/link tokens.
+
+To preserve your existing setup:
+1. Back up your current BloodConnect_Corrected folder.
+2. Extract this archive.
+3. Copy/merge the contents of the included BloodConnect_Corrected folder into your
+   EXISTING BloodConnect_Corrected folder, allowing source files to be replaced.
+4. Do NOT delete or replace your existing backend/.env or backend/data/ folder.
+   Keep your existing SMTP settings, bot token, user accounts, and request data.
+5. Do not copy a .venv from another machine. Keep your existing local virtual environment.
+6. Restart the backend and hard-refresh the frontend.
+
+Telegram behavior:
+- The permanent Link Telegram navigation button is removed.
+- Signed-in users who have not connected Telegram see an onboarding prompt.
+- Each user must open the bot and press START once. Telegram does not allow a bot to
+  initiate a private conversation before the user authorizes it.
+- After linking, compatible, available, eligible, in-radius donors can receive new request
+  alerts, and the requester can receive a notification when a donor accepts.
+
+The package includes the complete project source, not only the Telegram patch, but it
+intentionally does not bundle credentials or live user data.

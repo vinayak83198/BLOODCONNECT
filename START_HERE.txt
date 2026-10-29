@@ -1,0 +1,32 @@
+BLOODCONNECT - CORRECTED SOURCE FOLDER
+
+This folder preserves the existing frontend and FastAPI backend structure.
+Live user/request/token JSON records from the uploaded project were cleared for privacy. Demo data can be recreated with backend/seed_data.py.
+
+RUN FRONTEND (Terminal 1):
+  cd ".../BloodConnect_Corrected/frontend"
+  python3 -m http.server 5500
+  Open http://localhost:5500/index.html
+
+RUN BACKEND (Terminal 2):
+  cd ".../BloodConnect_Corrected/backend"
+  python -m venv .venv
+  source .venv/bin/activate
+  pip install -r requirements.txt
+  python -m uvicorn main:app --reload --port 8000
+  Open http://127.0.0.1:8000/docs
+
+OPTIONAL DEMO DATA:
+  From backend/ with the virtual environment active:
+  python seed_data.py
+  Demo users use password Passw0rd! (demo only; do not use these credentials in production).
+
+EMAIL:
+  Signup verification, resend verification, and forgot/reset password emails require SMTP environment variables.
+  Copy .env.example values into your shell or configure them in your deployment environment. Use an SMTP app password, never your normal email password.
+
+TELEGRAM:
+  Telegram is optional. Configure TELEGRAM_BOT_TOKEN in the backend environment using a rotated token. Never commit the real token.
+
+IMPORTANT:
+  This is a local prototype using JSON files for storage. It is not production-ready storage for real patient or donor information.

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BloodConnect — Donor Search</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:wght@500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="page">
+  <header class="topbar">
+    <div class="topbar__brand">
+      <span class="topbar__brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C12 2 5 10.5 5 15a7 7 0 0014 0c0-4.5-7-13-7-13z" fill="#fff"/>
+        </svg>
+      </span>
+      BloodConnect
+    </div>
+    <nav class="topbar__nav" aria-label="Primary">
+      <a class="topbar__link" href="donor-search.html" aria-current="page">Donor Search</a>
+      <a class="topbar__link" href="request-form.html">New Request</a>
+      <a class="topbar__link" href="my-requests.html">My Requests</a>
+    </nav>
+    <div class="topbar__user">
+      <span class="topbar__user-name" data-nav-username></span>
+      <button class="btn btn--ghost btn--sm" data-nav-logout>Log out</button>
+      <button class="topbar__mobile-toggle" data-nav-toggle aria-expanded="false" aria-label="Toggle menu">☰</button>
+    </div>
+  </header>
+
+  <main class="shell">
+    <div class="page-header">
+      <p class="page-header__eyebrow">Search module</p>
+      <h1>Find compatible donors nearby</h1>
+      <p>Results are filtered by blood-type compatibility, distance, and the 90-day eligibility window before you ever see them.</p>
+    </div>
+
+    <div id="banner" class="banner" role="alert"></div>
+
+    <form id="search-form" class="filter-bar card card--pad">
+      <div class="field">
+        <label for="filter-blood-group">Blood group needed</label>
+        <select id="filter-blood-group" required>
+          <option value="">Select</option>
+          <option>O+</option><option>O-</option>
+          <option>A+</option><option>A-</option>
+          <option>B+</option><option>B-</option>
+          <option>AB+</option><option>AB-</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="filter-radius">Search radius</label>
+        <select id="filter-radius">
+          <option value="5">5 km</option>
+          <option value="10" selected>10 km</option>
+          <option value="20">20 km</option>
+          <option value="50">50 km</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="filter-availability">Availability</label>
+        <select id="filter-availability">
+          <option value="true" selected>Available now only</option>
+          <option value="false">Include unavailable</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn--primary" id="search-submit">
+        <span class="btn-label">Search</span>
+      </button>
+    </form>
+
+    <div id="results-area">
+      <div class="empty-state">
+        <h3>Set a blood group to search</h3>
+        <p>Choose the group you need above — we'll match it against nearby, compatible donors.</p>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/donor-search.js"></script>
+</body>
+</html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BloodConnect — Sign in</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:wght@500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="auth-shell">
+    <section class="auth-shell__intro">
+      <div class="auth-shell__brand">
+        <span class="topbar__brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C12 2 5 10.5 5 15a7 7 0 0014 0c0-4.5-7-13-7-13z" fill="#fff"/>
+          </svg>
+        </span>
+        BloodConnect
+      </div>
+
+      <div>
+        <h1 class="auth-shell__headline">A clearer path in an emergency.</h1>
+        <p class="auth-shell__sub">
+          Discover nearby, compatible donors and manage requests in one
+          structured, privacy-aware workflow — instead of scattered calls
+          and forwarded messages.
+        </p>
+      </div>
+
+      <div class="auth-shell__stats">
+        <div>
+          <div class="auth-shell__stat-value">5–20 km</div>
+          <div class="auth-shell__stat-label">configurable search radius</div>
+        </div>
+        <div>
+          <div class="auth-shell__stat-value">90 days</div>
+          <div class="auth-shell__stat-label">donor eligibility guard</div>
+        </div>
+        <div>
+          <div class="auth-shell__stat-value">Private</div>
+          <div class="auth-shell__stat-label">contact until accepted</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="auth-shell__form-side">
+      <div class="auth-card">
+        <div class="auth-tabs" role="tablist" aria-label="Sign in or create an account">
+          <button type="button" id="tab-login" class="is-active" role="tab" aria-selected="true" aria-controls="panel-login">Log in</button>
+          <button type="button" id="tab-signup" role="tab" aria-selected="false" aria-controls="panel-signup">Create account</button>
+        </div>
+
+        <div id="banner" class="banner" role="alert"></div>
+
+        <!-- Login -->
+        <div id="panel-login" class="auth-panel is-active" role="tabpanel" aria-labelledby="tab-login">
+          <form id="login-form" novalidate>
+            <div class="field" id="login-email-field">
+              <label for="login-email">Email</label>
+              <input type="email" id="login-email" name="email" autocomplete="email" required />
+              <div class="field-error">Enter a valid email address.</div>
+            </div>
+            <div class="field" id="login-password-field">
+              <label for="login-password">Password</label>
+              <input type="password" id="login-password" name="password" autocomplete="current-password" required />
+              <div class="field-error">Enter your password.</div>
+            </div>
+            <p class="auth-help-links"><a href="forgot-password.html">Forgot password?</a> <span aria-hidden="true">·</span> <a href="#" id="resend-verification-link">Resend verification email</a></p>
+            <button type="submit" class="btn btn--primary btn--block" id="login-submit">
+              <span class="btn-label">Log in</span>
+            </button>
+          </form>
+          <form id="login-otp-form" hidden novalidate>
+            <p class="hint" id="login-otp-message">Enter the 6-digit OTP sent to your email.</p>
+            <div class="field" id="login-otp-field">
+              <label for="login-otp">Email OTP</label>
+              <input type="text" id="login-otp" name="otp" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" minlength="6" required />
+              <div class="field-error">Enter the 6-digit OTP from your email.</div>
+            </div>
+            <button type="submit" class="btn btn--primary btn--block" id="login-otp-submit"><span class="btn-label">Verify OTP &amp; log in</span></button>
+            <button type="button" class="btn btn--ghost btn--block" id="login-otp-back">Back to login</button>
+          </form>
+        </div>
+
+        <!-- Signup -->
+        <div id="panel-signup" class="auth-panel" role="tabpanel" aria-labelledby="tab-signup">
+          <form id="signup-form" novalidate>
+            <div class="field-row">
+              <div class="field" id="signup-name-field">
+                <label for="signup-name">Full name</label>
+                <input type="text" id="signup-name" name="name" autocomplete="name" required minlength="2" />
+                <div class="field-error">Enter your name.</div>
+              </div>
+              <div class="field" id="signup-phone-field">
+                <label for="signup-phone">Phone</label>
+                <input type="tel" id="signup-phone" name="phone" autocomplete="tel" required minlength="7" />
+                <div class="field-error">Enter a valid phone number.</div>
+              </div>
+            </div>
+
+            <div class="field" id="signup-email-field">
+              <label for="signup-email">Email</label>
+              <input type="email" id="signup-email" name="email" autocomplete="email" required />
+              <div class="field-error">Enter a valid email address.</div>
+            </div>
+
+            <div class="field" id="signup-password-field">
+              <label for="signup-password">Password</label>
+              <input type="password" id="signup-password" name="password" autocomplete="new-password" required minlength="8" />
+              <div class="hint">At least 8 characters.</div>
+              <div class="field-error">Password must be at least 8 characters.</div>
+            </div>
+
+            <div class="field-row">
+              <div class="field" id="signup-role-field">
+                <label for="signup-role">I want to</label>
+                <select id="signup-role" name="role" required>
+                  <option value="both">Donate &amp; request</option>
+                  <option value="donor">Donate blood</option>
+                  <option value="recipient">Request blood</option>
+                </select>
+              </div>
+              <div class="field" id="signup-blood-field">
+                <label for="signup-blood">Blood group</label>
+                <select id="signup-blood" name="blood_group" required>
+                  <option value="">Select</option>
+                  <option>O+</option><option>O-</option>
+                  <option>A+</option><option>A-</option>
+                  <option>B+</option><option>B-</option>
+                  <option>AB+</option><option>AB-</option>
+                </select>
+                <div class="field-error">Select your blood group.</div>
+              </div>
+            </div>
+
+            <div class="field" id="signup-city-field">
+              <label for="signup-city">City</label>
+              <input type="text" id="signup-city" name="city" required minlength="2" />
+              <div class="field-error">Enter your city.</div>
+            </div>
+
+            <div class="field">
+              <label for="signup-location">Location</label>
+              <button type="button" class="btn btn--ghost btn--block" id="use-location-btn">
+                Use my current location
+              </button>
+              <div class="hint" id="location-status">Needed to match nearby donors and requests.</div>
+              <input type="hidden" id="signup-lat" name="latitude" />
+              <input type="hidden" id="signup-lng" name="longitude" />
+            </div>
+
+            <div class="field terms-acceptance" id="signup-terms-field">
+              <label class="terms-checkbox">
+                <input type="checkbox" id="signup-terms" name="accepted_terms" required />
+                <span>I agree to the <a href="terms.html" target="_blank" rel="noopener noreferrer">Terms &amp; Conditions</a> and have read the privacy information.</span>
+              </label>
+              <div class="field-error">You must accept the Terms &amp; Conditions.</div>
+            </div>
+            <button type="submit" class="btn btn--primary btn--block" id="signup-submit">
+              <span class="btn-label">Create account</span>
+            </button>
+          </form>
+        </div>
+        <div class="auth-bottom-links">
+          <a href="terms.html">Terms &amp; Conditions</a>
+          <button type="button" class="btn btn--ghost btn--sm" id="telegram-share-btn">Share on Telegram</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth-page.js"></script>
+</body>
+</html>
