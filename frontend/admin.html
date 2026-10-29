@@ -3,80 +3,305 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#111c31">
   <title>BloodConnect — Admin Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
   <style>
-    .admin-shell { max-width: 1180px; margin: 0 auto; padding: 32px 20px 56px; }
-    .admin-header { display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:28px; }
-    .admin-header h1 { margin:0 0 8px; }
-    .admin-muted { opacity:.72; margin:0; }
-    .admin-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:16px; margin:24px 0; }
-    .admin-card { background:var(--surface,#fff); border:1px solid var(--border,#e5e7eb); border-radius:14px; padding:22px; box-shadow:0 4px 18px rgba(20,30,50,.05); }
-    .admin-card h2 { font-size:14px; font-weight:600; margin:0 0 14px; }
-    .admin-number { font-size:32px; font-weight:700; line-height:1.2; }
-    .admin-columns { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:18px; }
-    .admin-list { list-style:none; margin:0; padding:0; }
-    .admin-list li { display:flex; justify-content:space-between; gap:12px; padding:12px 0; border-bottom:1px solid var(--border,#e5e7eb); }
-    .admin-list li:last-child { border-bottom:0; }
-    .admin-table-wrap { overflow-x:auto; }
-    .admin-table { width:100%; border-collapse:collapse; font-size:14px; }
-    .admin-table th,.admin-table td { text-align:left; padding:12px 10px; border-bottom:1px solid var(--border,#e5e7eb); }
-    .admin-table th { font-weight:600; }
-    .admin-status { text-transform:capitalize; }
-    .admin-message { padding:14px 16px; border-radius:10px; margin:16px 0; background:var(--surface,#fff); }
-    .admin-error { color:#a32020; }
-    @media(max-width:700px) { .admin-columns { grid-template-columns:1fr; } .admin-shell { padding:24px 14px; } }
+    :root {
+      --adm-ink: #172238;
+      --adm-muted: #7c879b;
+      --adm-border: #e8edf4;
+      --adm-bg: #f5f7fb;
+      --adm-red: #d93650;
+      --adm-navy: #111c31;
+      --adm-green: #16866b;
+      --adm-shadow: 0 8px 28px rgba(24,39,75,.045);
+    }
+
+    * { box-sizing: border-box; }
+    body.admin-body {
+      margin: 0;
+      background: var(--adm-bg);
+      color: var(--adm-ink);
+      font-family: Inter, system-ui, sans-serif;
+    }
+    .admin-layout { min-height: 100vh; }
+    .admin-sidebar {
+      position: fixed; inset: 0 auto 0 0; z-index: 5;
+      width: 246px; padding: 25px 17px;
+      display: flex; flex-direction: column;
+      background: var(--adm-navy); color: #fff;
+    }
+    .admin-brand { display: flex; align-items: center; gap: 12px; padding: 0 10px 29px; }
+    .admin-brand-mark {
+      display: grid; place-items: center; width: 42px; height: 42px;
+      border-radius: 14px; background: var(--adm-red); color: #fff;
+      font-size: 23px; font-weight: 800;
+    }
+    .admin-brand strong { display: block; font-size: 17px; letter-spacing: -.5px; }
+    .admin-brand small { display: block; margin-top: 4px; color: #a7b4ca; font-size: 10px; letter-spacing: 1.6px; }
+    .admin-side-label { padding: 0 12px; margin: 8px 0 10px; color: #8290a9; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; }
+    .admin-nav { display: grid; gap: 7px; }
+    .admin-nav a {
+      display: flex; align-items: center; gap: 12px; padding: 12px 13px;
+      border-radius: 10px; color: #b9c5d8; text-decoration: none;
+      font-size: 13px; font-weight: 600; transition: .2s ease;
+    }
+    .admin-nav a:hover, .admin-nav a.active { background: #26344d; color: #fff; }
+    .admin-nav a.active { box-shadow: inset 3px 0 var(--adm-red); }
+    .admin-nav-icon { width: 21px; text-align: center; font-size: 17px; }
+    .admin-side-bottom { margin-top: auto; padding: 15px 10px 0; border-top: 1px solid #29364b; }
+    .admin-side-bottom p { margin: 0 0 7px; color: #8f9db4; font-size: 11px; }
+    .admin-side-bottom strong { color: #e5ebf4; font-size: 12px; overflow-wrap: anywhere; }
+
+    .admin-main { margin-left: 246px; padding: 31px clamp(18px, 3vw, 42px) 45px; max-width: 1800px; }
+    .admin-topbar { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 30px; }
+    .admin-eyebrow { margin: 0 0 9px; color: var(--adm-red); font-size: 11px; font-weight: 800; letter-spacing: 1.7px; text-transform: uppercase; }
+    .admin-topbar h1 { margin: 0; color: var(--adm-ink); font-size: clamp(25px, 3vw, 34px); letter-spacing: -1.2px; line-height: 1.15; }
+    .admin-subtitle { margin: 9px 0 0; color: var(--adm-muted); font-size: 13px; line-height: 1.6; }
+    .admin-actions { display: flex; flex-wrap: wrap; gap: 9px; }
+    .admin-actions button { min-height: 40px; border-radius: 10px; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+    .admin-refresh { padding: 0 14px; color: #33415a; background: #fff; border: 1px solid var(--adm-border); }
+    .admin-refresh:hover { border-color: #b8c3d5; }
+    .admin-logout { padding: 0 15px; color: #fff; background: var(--adm-red); border: 1px solid var(--adm-red); }
+    .admin-logout:hover { background: #bf2942; }
+    button:disabled { opacity: .6; cursor: wait; }
+
+    .admin-welcome {
+      display: flex; align-items: center; gap: 12px; padding: 15px 18px;
+      margin-bottom: 22px; border: 1px solid #f3d8de; border-radius: 13px;
+      background: linear-gradient(100deg,#fff 0%,#fff5f6 100%);
+    }
+    .admin-welcome-icon { display: grid; place-items: center; width: 42px; height: 42px; flex-shrink: 0; border-radius: 12px; background: #ffe3e8; font-size: 21px; }
+    .admin-welcome strong { display: block; margin-bottom: 4px; font-size: 13px; }
+    .admin-welcome p { margin: 0; color: var(--adm-muted); font-size: 12px; line-height: 1.5; }
+
+    .admin-message { padding: 13px 16px; margin: 0 0 18px; border: 1px solid var(--adm-border); border-radius: 11px; background: #fff; color: #42516a; font-size: 13px; line-height: 1.6; }
+    .admin-error { color: #a32020; border-color: #f2c9cf; background: #fff4f5; }
+
+    .admin-section-heading { display: flex; justify-content: space-between; align-items: end; gap: 12px; margin: 27px 0 15px; }
+    .admin-section-heading h2 { margin: 0; font-size: 16px; letter-spacing: -.35px; }
+    .admin-section-heading p { margin: 5px 0 0; color: var(--adm-muted); font-size: 11px; }
+    .admin-live-label { display: inline-flex; align-items: center; gap: 7px; color: var(--adm-green); font-size: 11px; font-weight: 700; }
+    .admin-live-dot { width: 7px; height: 7px; border-radius: 50%; background: #20a77e; box-shadow: 0 0 0 4px #def7ed; }
+
+    .admin-stats { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 15px; }
+    .admin-stat {
+      min-width: 0; padding: 19px; border: 1px solid var(--adm-border);
+      border-radius: 15px; background: #fff; box-shadow: var(--adm-shadow);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .admin-stat:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(24,39,75,.08); }
+    .admin-stat-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 20px; }
+    .admin-stat-icon { display: grid; place-items: center; width: 39px; height: 39px; border-radius: 12px; font-size: 19px; }
+    .tone-blue { background: #e9efff; color: #4969cb; }
+    .tone-red { background: #ffe8ec; color: #d93650; }
+    .tone-green { background: #e0f7ed; color: #16866b; }
+    .tone-amber { background: #fff2d9; color: #b77b19; }
+    .tone-purple { background: #f0eaff; color: #8058c8; }
+    .admin-stat-tag { color: #8792a5; font-size: 10px; font-weight: 700; }
+    .admin-stat-label { margin: 0 0 8px; color: var(--adm-muted); font-size: 11px; font-weight: 600; line-height: 1.5; }
+    .admin-number { color: var(--adm-ink); font-size: clamp(25px,2.4vw,34px); font-weight: 800; letter-spacing: -1.2px; line-height: 1.1; overflow-wrap: anywhere; }
+
+    .admin-panels { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 17px; }
+    .admin-panel { min-width: 0; padding: 21px; border: 1px solid var(--adm-border); border-radius: 15px; background: #fff; box-shadow: var(--adm-shadow); }
+    .admin-panel-header { display: flex; align-items: start; justify-content: space-between; gap: 12px; margin-bottom: 17px; }
+    .admin-panel-header h2 { margin: 0; font-size: 14px; letter-spacing: -.25px; }
+    .admin-panel-header p { margin: 6px 0 0; color: var(--adm-muted); font-size: 11px; }
+    .admin-panel-badge { padding: 6px 9px; border-radius: 8px; background: #f2f5fa; color: #69778d; font-size: 10px; font-weight: 700; white-space: nowrap; }
+    .admin-list { list-style: none; margin: 0; padding: 0; }
+    .admin-list li { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 9px 12px; padding: 13px 0; border-bottom: 1px solid #edf0f5; }
+    .admin-list li:first-child { padding-top: 4px; }
+    .admin-list li:last-child { border-bottom: 0; padding-bottom: 2px; }
+    .admin-list li > span:first-child { color: #46536a; font-size: 12px; font-weight: 600; text-transform: capitalize; overflow-wrap: anywhere; }
+    .admin-list strong { color: var(--adm-ink); font-size: 12px; }
+    .admin-meter { grid-column: 1 / -1; height: 6px; overflow: hidden; border-radius: 99px; background: #edf1f7; }
+    .admin-meter span { display: block; height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg,#e65a70,#cf2f4a); transition: width .5s ease; }
+    #blood-groups .admin-meter span { background: linear-gradient(90deg,#667fe3,#8798f1); }
+
+    .admin-table-panel { margin-top: 18px; padding: 0; overflow: hidden; }
+    .admin-table-panel .admin-panel-header { padding: 21px 22px 15px; margin: 0; }
+    .admin-table-wrap { overflow-x: auto; }
+    .admin-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; }
+    .admin-table th { padding: 13px 17px; background: #f8f9fc; color: #7c879b; font-size: 10px; font-weight: 800; letter-spacing: .7px; text-transform: uppercase; white-space: nowrap; }
+    .admin-table td { padding: 15px 17px; border-bottom: 1px solid #edf0f5; color: #46536a; vertical-align: middle; }
+    .admin-table tbody tr:last-child td { border-bottom: 0; }
+    .admin-table tbody tr:hover { background: #fcfdff; }
+    .admin-recipient { color: var(--adm-ink); font-weight: 700; }
+    .admin-blood { display: inline-flex; align-items: center; justify-content: center; min-width: 38px; padding: 6px 8px; border-radius: 8px; background: #ffe9ed; color: #c72e48; font-weight: 800; }
+    .admin-status { display: inline-flex; padding: 6px 9px; border-radius: 99px; background: #eef2f7; color: #58677e; font-size: 10px; font-weight: 700; text-transform: capitalize; white-space: nowrap; }
+    .status-completed,.status-fulfilled { background: #e0f7ed; color: #147455; }
+    .status-pending,.status-open { background: #fff2d9; color: #936311; }
+    .status-accepted,.status-in_progress { background: #e8efff; color: #3d5bb4; }
+    .admin-urgency { font-weight: 700; text-transform: capitalize; }
+    .urgency-emergency,.urgency-critical { color: #cf2f4a; }
+    .admin-empty { padding: 28px 16px !important; text-align: center; color: var(--adm-muted) !important; }
+    .admin-footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; padding: 19px 2px 0; color: #8b96a8; font-size: 10px; }
+
+    [hidden] { display: none !important; }
+
+    @media(max-width:1250px) {
+      .admin-stats { grid-template-columns: repeat(3,minmax(0,1fr)); }
+    }
+    @media(max-width:900px) {
+      .admin-sidebar { position: relative; width: 100%; padding: 15px 18px; }
+      .admin-brand { padding: 0 2px 15px; }
+      .admin-side-label,.admin-side-bottom { display: none; }
+      .admin-nav { display: flex; overflow-x: auto; padding-bottom: 2px; }
+      .admin-nav a { flex: 0 0 auto; padding: 10px 12px; }
+      .admin-main { margin-left: 0; padding: 24px 20px 35px; }
+    }
+    @media(max-width:650px) {
+      .admin-main { padding: 20px 13px 28px; }
+      .admin-topbar { align-items: flex-start; flex-direction: column; margin-bottom: 22px; }
+      .admin-actions { width: 100%; }
+      .admin-actions button { flex: 1; }
+      .admin-stats { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+      .admin-stat { padding: 14px; }
+      .admin-stat-top { margin-bottom: 15px; }
+      .admin-stat-icon { width: 34px; height: 34px; }
+      .admin-panels { grid-template-columns: 1fr; }
+      .admin-panel { padding: 17px; }
+      .admin-table-panel { padding: 0; }
+      .admin-table-panel .admin-panel-header { padding: 18px 16px 14px; }
+      .admin-table th,.admin-table td { padding: 13px 12px; }
+      .admin-footer { padding-top: 15px; }
+    }
+    @media(prefers-reduced-motion:reduce) {
+      *,*::before,*::after { transition: none !important; scroll-behavior: auto !important; }
+    }
   </style>
 </head>
-<body>
-  <main class="admin-shell">
-    <header class="admin-header">
-      <div>
-        <p class="admin-muted">BloodConnect / Administration</p>
-        <h1>Admin Dashboard</h1>
-        <p class="admin-muted" id="admin-welcome">Checking administrator access…</p>
-      </div>
-      <div>
-        <button class="btn btn--ghost" id="refresh-btn" type="button">Refresh data</button>
-        <button class="btn btn--primary" id="logout-btn" type="button">Log out</button>
-      </div>
-    </header>
-
-    <div id="admin-message" class="admin-message" role="status" aria-live="polite">Verifying access…</div>
-
-    <section id="dashboard-content" hidden>
-      <div class="admin-grid">
-        <article class="admin-card"><h2>Total users</h2><div class="admin-number" id="total-users">—</div></article>
-        <article class="admin-card"><h2>Donors</h2><div class="admin-number" id="total-donors">—</div></article>
-        <article class="admin-card"><h2>Recipients</h2><div class="admin-number" id="total-recipients">—</div></article>
-        <article class="admin-card"><h2>Available donors</h2><div class="admin-number" id="available-donors">—</div></article>
-        <article class="admin-card"><h2>Total blood requests</h2><div class="admin-number" id="total-requests">—</div></article>
-      </div>
-
-      <div class="admin-columns">
-        <section class="admin-card">
-          <h2>Request status</h2>
-          <ul class="admin-list" id="request-statuses"></ul>
-        </section>
-        <section class="admin-card">
-          <h2>Blood-group distribution</h2>
-          <ul class="admin-list" id="blood-groups"></ul>
-        </section>
-      </div>
-
-      <section class="admin-card" style="margin-top:18px">
-        <h2>Recent blood requests</h2>
-        <div class="admin-table-wrap">
-          <table class="admin-table">
-            <thead><tr><th>Recipient</th><th>Blood group</th><th>Hospital</th><th>Urgency</th><th>Status</th></tr></thead>
-            <tbody id="recent-requests"><tr><td colspan="5">Loading requests…</td></tr></tbody>
-          </table>
+<body class="admin-body">
+  <div class="admin-layout">
+    <aside class="admin-sidebar">
+      <div class="admin-brand">
+        <div class="admin-brand-mark" aria-hidden="true">+</div>
+        <div>
+          <strong>BloodConnect</strong>
+          <small>ADMINISTRATION</small>
         </div>
+      </div>
+
+      <p class="admin-side-label">WORKSPACE</p>
+      <nav class="admin-nav" aria-label="Admin navigation">
+        <a class="active" href="#overview"><span class="admin-nav-icon">▦</span> Overview</a>
+        <a href="#analytics"><span class="admin-nav-icon">▥</span> Analytics</a>
+        <a href="#recent-activity"><span class="admin-nav-icon">♡</span> Blood requests</a>
+        <a href="donor-search.html"><span class="admin-nav-icon">⌕</span> Donor search</a>
+      </nav>
+
+      <div class="admin-side-bottom">
+        <p>SECURE ADMIN SESSION</p>
+        <strong>BloodConnect Platform</strong>
+      </div>
+    </aside>
+
+    <main class="admin-main">
+      <header class="admin-topbar">
+        <div>
+          <p class="admin-eyebrow">Platform control center</p>
+          <h1>Dashboard overview</h1>
+          <p class="admin-subtitle">Monitor donors, blood requests and platform activity in one place.</p>
+        </div>
+        <div class="admin-actions">
+          <button class="admin-refresh" id="refresh-btn" type="button">↻ &nbsp; Refresh data</button>
+          <button class="admin-logout" id="logout-btn" type="button">Log out &nbsp; ↗</button>
+        </div>
+      </header>
+
+      <div class="admin-welcome">
+        <div class="admin-welcome-icon" aria-hidden="true">♥</div>
+        <div>
+          <strong>Welcome to BloodConnect Admin</strong>
+          <p id="admin-welcome">Checking administrator access…</p>
+        </div>
+      </div>
+
+      <div id="admin-message" class="admin-message" role="status" aria-live="polite">Verifying access…</div>
+
+      <section id="dashboard-content" hidden>
+        <div class="admin-section-heading" id="overview">
+          <div>
+            <h2>Platform at a glance</h2>
+            <p>Key figures from your BloodConnect database</p>
+          </div>
+          <span class="admin-live-label"><span class="admin-live-dot"></span> Live data</span>
+        </div>
+
+        <div class="admin-stats">
+          <article class="admin-stat">
+            <div class="admin-stat-top"><span class="admin-stat-icon tone-blue">♙</span><span class="admin-stat-tag">USERS</span></div>
+            <p class="admin-stat-label">Total users</p><div class="admin-number" id="total-users">—</div>
+          </article>
+          <article class="admin-stat">
+            <div class="admin-stat-top"><span class="admin-stat-icon tone-red">♥</span><span class="admin-stat-tag">DONORS</span></div>
+            <p class="admin-stat-label">Registered donors</p><div class="admin-number" id="total-donors">—</div>
+          </article>
+          <article class="admin-stat">
+            <div class="admin-stat-top"><span class="admin-stat-icon tone-purple">♡</span><span class="admin-stat-tag">RECIPIENTS</span></div>
+            <p class="admin-stat-label">Recipients</p><div class="admin-number" id="total-recipients">—</div>
+          </article>
+          <article class="admin-stat">
+            <div class="admin-stat-top"><span class="admin-stat-icon tone-green">✓</span><span class="admin-stat-tag">AVAILABLE</span></div>
+            <p class="admin-stat-label">Available donors</p><div class="admin-number" id="available-donors">—</div>
+          </article>
+          <article class="admin-stat">
+            <div class="admin-stat-top"><span class="admin-stat-icon tone-amber">▤</span><span class="admin-stat-tag">REQUESTS</span></div>
+            <p class="admin-stat-label">Total blood requests</p><div class="admin-number" id="total-requests">—</div>
+          </article>
+        </div>
+
+        <div class="admin-section-heading" id="analytics">
+          <div>
+            <h2>Insights & distribution</h2>
+            <p>Understand request progress and donor blood groups</p>
+          </div>
+        </div>
+
+        <div class="admin-panels">
+          <section class="admin-panel">
+            <div class="admin-panel-header">
+              <div><h2>Request status</h2><p>Requests grouped by current status</p></div>
+              <span class="admin-panel-badge">STATUS</span>
+            </div>
+            <ul class="admin-list" id="request-statuses"></ul>
+          </section>
+
+          <section class="admin-panel">
+            <div class="admin-panel-header">
+              <div><h2>Blood-group distribution</h2><p>Registered users by blood group</p></div>
+              <span class="admin-panel-badge">BLOOD GROUP</span>
+            </div>
+            <ul class="admin-list" id="blood-groups"></ul>
+          </section>
+        </div>
+
+        <section class="admin-panel admin-table-panel" id="recent-activity">
+          <div class="admin-panel-header">
+            <div><h2>Recent blood requests</h2><p>Latest requests recorded on the platform</p></div>
+            <span class="admin-panel-badge">LATEST 10</span>
+          </div>
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr><th>Recipient</th><th>Blood group</th><th>Hospital</th><th>Urgency</th><th>Status</th><th>Created</th></tr>
+              </thead>
+              <tbody id="recent-requests"><tr><td class="admin-empty" colspan="6">Loading requests…</td></tr></tbody>
+            </table>
+          </div>
+        </section>
+
+        <footer class="admin-footer">
+          <span>BloodConnect · Administrator workspace</span>
+          <span>Use platform data responsibly.</span>
+        </footer>
       </section>
-    </section>
-  </main>
+    </main>
+  </div>
 
   <script>
     window.BLOODCONNECT_API_BASE_URL = "https://bloodconnect-kfks.onrender.com";
