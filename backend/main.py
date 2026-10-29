@@ -10,16 +10,10 @@ Run locally:
 Serves the REST API only; the frontend/ folder is static HTML/CSS/JS.
 """
 
-import asyncio
 import logging
-import os
-
-from dotenv import load_dotenv
-
-load_dotenv()
-
 from contextlib import asynccontextmanager
 
+from dotenv import load_dotenv
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -27,33 +21,29 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from routers import auth, donors, requests as blood_requests, telegram
-from utils.telegram_bot import telegram_polling_loop
+
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Start and stop the Telegram bot with the FastAPI application."""
-    telegram_task = None
+    """
+    Start the BloodConnect API.
 
-    if os.getenv("TELEGRAM_BOT_TOKEN"):
-        logger.info("Starting BloodConnect Telegram bot...")
-        telegram_task = asyncio.create_task(telegram_polling_loop())
-    else:
-        logger.warning(
-            "Telegram bot not started: TELEGRAM_BOT_TOKEN is not configured."
-        )
+    Telegram background polling is disabled on this web service
+    to prevent duplicate getUpdates polling conflicts (HTTP 409).
+    Telegram REST API routes remain registered.
+    """
+    logger.info(
+        "BloodConnect API starting. "
+        "Automatic Telegram polling is disabled on this service."
+    )
 
-    try:
-        yield
-    finally:
-        if telegram_task:
-            telegram_task.cancel()
-            try:
-                await telegram_task
-            except asyncio.CancelledError:
-                pass
+    yield
+
+    logger.info("BloodConnect API shutting down.")
 
 
 app = FastAPI(
@@ -66,7 +56,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS setup: frontend is served separately during development.
+# CORS configuration.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -75,7 +65,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Register existing routers.
+# Register existing API routers.
 app.include_router(auth.router)
 app.include_router(donors.router)
 app.include_router(blood_requests.router)
@@ -113,7 +103,9 @@ async def validation_exception_handler(
                 "status_code": 422,
                 "fields": [
                     {
-                        "field": ".".join(str(part) for part in error["loc"][1:]),
+                        "field": ".".join(
+                            str(part) for part in error["loc"][1:]
+                        ),
                         "issue": error["msg"],
                     }
                     for error in exc.errors()
@@ -128,7 +120,10 @@ async def unhandled_exception_handler(
     request: Request,
     exc: Exception,
 ) -> JSONResponse:
-    logger.exception("Unhandled application exception", exc_info=exc)
+    logger.exception(
+        "Unhandled application exception",
+        exc_info=exc,
+    )
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={
@@ -142,4 +137,7 @@ async def unhandled_exception_handler(
 
 @app.get("/api/health", tags=["health"])
 def health_check() -> dict:
-    return {"status": "ok", "service": "bloodconnect-api"}
+    return {
+        "status": "ok",
+        "service": "bloodconnect-api",
+    }
