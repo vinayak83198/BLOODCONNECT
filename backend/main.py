@@ -10,7 +10,9 @@ Run locally:
 Serves the REST API only; the frontend/ folder is static HTML/CSS/JS.
 """
 
+import asyncio
 import logging
+import os
 from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
@@ -20,30 +22,36 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from routers import auth, donors, requests as blood_requests, telegram
-
 load_dotenv()
+
+from routers import auth, donors, requests as blood_requests, telegram
+from utils.telegram_bot import telegram_polling_loop
 
 logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """
-    Start the BloodConnect API.
+    """Start and stop Telegram polling with the FastAPI application."""
+    telegram_task = None
 
-    Telegram background polling is disabled on this web service
-    to prevent duplicate getUpdates polling conflicts (HTTP 409).
-    Telegram REST API routes remain registered.
-    """
-    logger.info(
-        "BloodConnect API starting. "
-        "Automatic Telegram polling is disabled on this service."
-    )
+    if os.getenv("TELEGRAM_BOT_TOKEN"):
+        logger.info("Starting BloodConnect Telegram bot polling...")
+        telegram_task = asyncio.create_task(telegram_polling_loop())
+    else:
+        logger.warning(
+            "Telegram bot not started: TELEGRAM_BOT_TOKEN is not configured."
+        )
 
-    yield
-
-    logger.info("BloodConnect API shutting down.")
+    try:
+        yield
+    finally:
+        if telegram_task:
+            telegram_task.cancel()
+            try:
+                await telegram_task
+            except asyncio.CancelledError:
+                logger.info("Telegram polling task stopped.")
 
 
 app = FastAPI(
@@ -56,7 +64,6 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS configuration.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -65,14 +72,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Register existing API routers.
 app.include_router(auth.router)
 app.include_router(donors.router)
 app.include_router(blood_requests.router)
 app.include_router(telegram.router)
 
-
-# Centralized exception handlers.
 
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(
