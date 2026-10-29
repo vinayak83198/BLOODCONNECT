@@ -4,10 +4,27 @@
  * and wires logout. Include after api.js.
  */
 (function initNav() {
-  const { auth } = window.BloodConnect;
-
+  const { auth, api } = window.BloodConnect;
   document.addEventListener("DOMContentLoaded", () => {
     const user = auth.getUser();
+    const nav = document.querySelector(".topbar__nav");
+
+    // Show Dashboard only when the backend confirms admin access.
+    if (nav && auth.isLoggedIn()) {
+      api.adminAccess().then(() => {
+        if (nav.querySelector("[data-admin-link]")) return;
+
+        const link = document.createElement("a");
+        link.className = "topbar__link";
+        link.href = "admin.html";
+        link.textContent = "Dashboard";
+        link.dataset.adminLink = "true";
+        nav.appendChild(link);
+      }).catch(() => {
+        // Regular users should not see the admin link.
+      });
+    }
+
     const nameEl = document.querySelector("[data-nav-username]");
     if (nameEl && user) {
       nameEl.textContent = user.name;

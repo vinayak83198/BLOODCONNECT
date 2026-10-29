@@ -4,7 +4,10 @@
  * so every page's script can just `await` a call and catch one shape
  * of error.
  */
-const API_BASE_URL = window.BLOODCONNECT_API_BASE_URL || "https://bloodconnect-kfks.onrender.com";
+const API_BASE_URL = window.BLOODCONNECT_API_BASE_URL ||
+  (["localhost", "127.0.0.1"].includes(window.location.hostname)
+    ? "http://127.0.0.1:8000"
+    : "https://bloodconnect-kfks.onrender.com");
 const TOKEN_KEY = "bloodconnect_token";
 const USER_KEY = "bloodconnect_user";
 
@@ -112,6 +115,7 @@ async function apiRequest(path, { method = "GET", body, auth: needsAuth = true, 
 }
 
 const api = {
+adminAccess: () => apiRequest("/api/admin/access"),
   signup: (data) => apiRequest("/api/auth/signup", { method: "POST", body: data, auth: false }),
   login: (data) => apiRequest("/api/auth/login", { method: "POST", body: data, auth: false }),
   verifyLoginOtp: (email, otp) => apiRequest("/api/auth/verify-login-otp", { method: "POST", body: { email, otp }, auth: false }),
