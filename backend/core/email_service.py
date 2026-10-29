@@ -1,10 +1,9 @@
 
-"""Email delivery for verification and password-reset links using Resend."""
+"""Email delivery for verification and password-reset links using Gmail SMTP."""
 
-import json
 import os
-from urllib.error import HTTPError, URLError
-from urllib.request import Request, urlopen
+import smtplib
+from email.message import EmailMessage
 
 from fastapi import HTTPException, status
 
@@ -15,58 +14,40 @@ def send_email(
     text_body: str,
     html_body: str | None = None,
 ) -> None:
-    api_key = os.getenv("RESEND_API_KEY")
-    from_email = os.getenv(
-        "RESEND_FROM_EMAIL",
-        "BloodConnect <onboarding@resend.dev>",
-    )
+    host = os.getenv("SMTP_HOST", "smtp.gmail.com")
+    username = os.getenv("SMTP_USERNAME")
+    password = os.getenv("SMTP_PASSWORD")
+    from_email = os.getenv("SMTP_FROM_EMAIL") or username
 
-    if not api_key:
+    if not username or not password or not from_email:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Email delivery is not configured. Please try again later.",
+            detail="Email delivery is not configured.",
         )
 
-    payload = {
-        "from": from_email,
-        "to": [to_email],
-        "subject": subject,
-        "text": text_body,
-    }
+    msg = EmailMessage()
+    msg["Subject"] = subject
+    msg["From"] = from_email
+    msg["To"] = to_email
+    msg.set_content(text_body)
 
     if html_body:
-        payload["html"] = html_body
-
-    request = Request(
-        "https://api.resend.com/emails",
-        data=json.dumps(payload).encode("utf-8"),
-       headers={
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json",
-        "User-Agent": "BloodConnect/1.0",
-        },
-        method="POST",
-    )
+        msg.add_alternative(html_body, subtype="html")
 
     try:
-        with urlopen(request, timeout=20) as response:
-            response.read()
+        port = int(os.getenv("SMTP_PORT", "587"))
+        timeout = float(os.getenv("SMTP_TIMEOUT_SECONDS", "15"))
 
-    except HTTPError as exc:
-        # Log the provider response for debugging without exposing the API key.
-        error_body = exc.read().decode("utf-8", errors="replace")
-        print(
-            f"RESEND ERROR: HTTP {exc.code}: {error_body}",
-            flush=True,
-        )
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="We could not send the email right now. Please try again.",
-        ) from exc
+        with smtplib.SMTP(host, port, timeout=timeout) as server:
+            server.ehlo()
+            server.starttls()
+            server.ehlo()
+            server.login(username, password)
+            server.send_message(msg)
 
-    except (URLError, TimeoutError, OSError, ValueError) as exc:
+    except (OSError, smtplib.SMTPException, ValueError) as exc:
         print(
-            f"RESEND ERROR: {type(exc).__name__}: {exc}",
+            f"SMTP ERROR: {type(exc).__name__}: {exc}",
             flush=True,
         )
         raise HTTPException(
