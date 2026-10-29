@@ -4,7 +4,7 @@
  * so every page's script can just `await` a call and catch one shape
  * of error.
  */
-const API_BASE_URL = window.BLOODCONNECT_API_BASE_URL||"http://127.0.0.1:8000";
+const API_BASE_URL = window.BLOODCONNECT_API_BASE_URL || "https://bloodconnect-kfks.onrender.com";
 const TOKEN_KEY = "bloodconnect_token";
 const USER_KEY = "bloodconnect_user";
 
