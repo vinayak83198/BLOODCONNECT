@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BloodConnect — Admin Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    .admin-shell { max-width: 1180px; margin: 0 auto; padding: 32px 20px 56px; }
+    .admin-header { display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:28px; }
+    .admin-header h1 { margin:0 0 8px; }
+    .admin-muted { opacity:.72; margin:0; }
+    .admin-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:16px; margin:24px 0; }
+    .admin-card { background:var(--surface,#fff); border:1px solid var(--border,#e5e7eb); border-radius:14px; padding:22px; box-shadow:0 4px 18px rgba(20,30,50,.05); }
+    .admin-card h2 { font-size:14px; font-weight:600; margin:0 0 14px; }
+    .admin-number { font-size:32px; font-weight:700; line-height:1.2; }
+    .admin-columns { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:18px; }
+    .admin-list { list-style:none; margin:0; padding:0; }
+    .admin-list li { display:flex; justify-content:space-between; gap:12px; padding:12px 0; border-bottom:1px solid var(--border,#e5e7eb); }
+    .admin-list li:last-child { border-bottom:0; }
+    .admin-table-wrap { overflow-x:auto; }
+    .admin-table { width:100%; border-collapse:collapse; font-size:14px; }
+    .admin-table th,.admin-table td { text-align:left; padding:12px 10px; border-bottom:1px solid var(--border,#e5e7eb); }
+    .admin-table th { font-weight:600; }
+    .admin-status { text-transform:capitalize; }
+    .admin-message { padding:14px 16px; border-radius:10px; margin:16px 0; background:var(--surface,#fff); }
+    .admin-error { color:#a32020; }
+    @media(max-width:700px) { .admin-columns { grid-template-columns:1fr; } .admin-shell { padding:24px 14px; } }
+  </style>
+</head>
+<body>
+  <main class="admin-shell">
+    <header class="admin-header">
+      <div>
+        <p class="admin-muted">BloodConnect / Administration</p>
+        <h1>Admin Dashboard</h1>
+        <p class="admin-muted" id="admin-welcome">Checking administrator access…</p>
+      </div>
+      <div>
+        <button class="btn btn--ghost" id="refresh-btn" type="button">Refresh data</button>
+        <button class="btn btn--primary" id="logout-btn" type="button">Log out</button>
+      </div>
+    </header>
+
+    <div id="admin-message" class="admin-message" role="status" aria-live="polite">Verifying access…</div>
+
+    <section id="dashboard-content" hidden>
+      <div class="admin-grid">
+        <article class="admin-card"><h2>Total users</h2><div class="admin-number" id="total-users">—</div></article>
+        <article class="admin-card"><h2>Donors</h2><div class="admin-number" id="total-donors">—</div></article>
+        <article class="admin-card"><h2>Recipients</h2><div class="admin-number" id="total-recipients">—</div></article>
+        <article class="admin-card"><h2>Available donors</h2><div class="admin-number" id="available-donors">—</div></article>
+        <article class="admin-card"><h2>Total blood requests</h2><div class="admin-number" id="total-requests">—</div></article>
+      </div>
+
+      <div class="admin-columns">
+        <section class="admin-card">
+          <h2>Request status</h2>
+          <ul class="admin-list" id="request-statuses"></ul>
+        </section>
+        <section class="admin-card">
+          <h2>Blood-group distribution</h2>
+          <ul class="admin-list" id="blood-groups"></ul>
+        </section>
+      </div>
+
+      <section class="admin-card" style="margin-top:18px">
+        <h2>Recent blood requests</h2>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>Recipient</th><th>Blood group</th><th>Hospital</th><th>Urgency</th><th>Status</th></tr></thead>
+            <tbody id="recent-requests"><tr><td colspan="5">Loading requests…</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    window.BLOODCONNECT_API_BASE_URL = "https://bloodconnect-kfks.onrender.com";
+  </script>
+  <script src="js/api.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
