@@ -24,7 +24,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 load_dotenv()
 
-from routers import auth, donors, requests as blood_requests, telegram
+from routers import admin, auth, donors, requests as blood_requests, telegram
 from utils.telegram_bot import telegram_polling_loop
 
 logger = logging.getLogger(__name__)
@@ -76,6 +76,7 @@ app.include_router(auth.router)
 app.include_router(donors.router)
 app.include_router(blood_requests.router)
 app.include_router(telegram.router)
+app.include_router(admin.router)
 
 
 @app.exception_handler(StarletteHTTPException)
